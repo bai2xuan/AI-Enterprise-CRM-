@@ -1,0 +1,67 @@
+<?php
+/**
+ * ============================================================
+ * SuiteCRM 静默安装配置模板 (config_si.php.example)
+ * ============================================================
+ * 用途：自动化部署 SuiteCRM，无需通过网页向导逐步填写。
+ *
+ * 使用方法：
+ *   1. 复制本文件为同目录下的 config_si.php
+ *   2. 按实际环境修改下方数据库/站点参数
+ *   3. 启动 Web 服务后访问：http://<host>:<port>/install.php
+ *      （install.php 检测到 config_si.php 会自动执行静默安装）
+ *
+ * 命令行触发方式：
+ *   curl "http://localhost:8080/install.php?goto=SilentInstall&cli=true"
+ * ============================================================
+ */
+$sugar_config_si = array(
+
+    /* ---------------- 数据库配置 ---------------- */
+    'setup_db_type'                         => 'mysql',
+    'setup_db_host_name'                    => '127.0.0.1',
+    'setup_db_host_instance'                => '',
+    'setup_db_port_num'                     => '3307',
+    'setup_db_database_name'                => 'suitecrm',
+    'setup_db_sugarsales_user'              => 'suitecrm',
+    'setup_db_sugarsales_password'          => 'CHANGE_ME_BEFORE_DEPLOY',   // ← 部署前请修改
+    'setup_db_sugarsales_password_retype'   => 'CHANGE_ME_BEFORE_DEPLOY',
+    'setup_db_create_database'              => true,
+    'setup_db_drop_tables'                  => false,
+    'setup_db_username_is_privileged'       => false,
+    'setup_db_create_sugarsales_user'       => true,
+    'setup_db_admin_user_name'              => 'root',
+    'setup_db_admin_password'               => 'CHANGE_ME_BEFORE_DEPLOY',   // ← 部署前请修改
+    'dbUSRData'                             => 'same',
+
+    /* ---------------- 站点配置 ---------------- */
+    'setup_site_url'                        => 'http://localhost:8080',
+    'setup_system_name'                     => '智联AI CRM',
+    'setup_site_sugarbeet'                  => false,
+    'setup_site_defaults'                   => true,
+    'setup_site_sugarbeet_automatic_checks' => false,
+    'setup_site_sugarbeet_anonymous_stats'  => false,
+    'setup_site_admin_user_name'            => 'admin',
+    'setup_site_admin_password'             => 'CHANGE_ME_BEFORE_DEPLOY',   // ← 部署前请修改
+    'setup_site_admin_password_retype'      => 'CHANGE_ME_BEFORE_DEPLOY',
+    'site_default_theme'                    => 'SuiteP',
+    'default_theme'                         => 'SuiteP',
+
+    /* ---------------- 本地化配置 ---------------- */
+    'default_language'                      => 'en_us',  // 中文语言包安装后可改为 zh_CN
+    'default_charset'                       => 'UTF-8',
+    'default_currency_iso4217'              => 'CNY',
+    'default_currency_name'                 => '人民币',
+    'default_currency_symbol'               => '¥',
+    'default_currency_significant_digits'   => '2',
+    'default_locale_name_format'            => 's f l',
+    'default_email_charset'                 => 'UTF-8',
+    'default_export_charset'                => 'UTF-8',
+    'export_delimiter'                      => ',',
+
+    /* ---------------- 其他 ---------------- */
+    'demoData'                              => 'no',
+    'disable_persistent_connections'        => false,
+    'setup_site_log_level'                  => 'fatal',
+    'strict_id_validation'                  => false,
+);
