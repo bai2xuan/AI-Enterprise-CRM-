@@ -1,0 +1,78 @@
+# ============================================================
+# AI Enterprise CRM  (.gitattributes)
+# 作用：统一换行符、声明二进制文件、修正 GitHub 语言统计
+# ============================================================
+
+# ---------- 换行符统一 ----------
+# 仓库内一律存 LF；检出时不做转换，避免 Windows / Linux 混用产生"假改动"
+* text=auto eol=lf
+
+*.php        text eol=lf
+*.js         text eol=lf
+*.mjs        text eol=lf
+*.css        text eol=lf
+*.scss       text eol=lf
+*.html       text eol=lf
+*.tpl        text eol=lf
+*.md         text eol=lf
+*.json       text eol=lf
+*.yml        text eol=lf
+*.yaml       text eol=lf
+*.ini        text eol=lf
+*.conf       text eol=lf
+*.sh         text eol=lf
+*.xml        text eol=lf
+
+# Windows 专用脚本必须保留 CRLF
+*.bat        text eol=crlf
+*.cmd        text eol=crlf
+
+# ---------- 二进制文件 ----------
+*.png        binary
+*.jpg        binary
+*.jpeg       binary
+*.gif        binary
+*.ico        binary
+*.bmp        binary
+*.webp       binary
+*.ttf        binary
+*.otf        binary
+*.woff       binary
+*.woff2      binary
+*.eot        binary
+*.zip        binary
+*.gz         binary
+*.7z         binary
+*.pdf        binary
+*.xlsx       binary
+*.docx       binary
+*.pptx       binary
+
+# 二进制不参与文本 diff，减少仓库噪音
+*.zip        -diff
+*.gz         -diff
+*.png        -diff
+*.jpg        -diff
+*.woff2      -diff
+
+# ---------- GitHub 语言统计（Linguist）标注 ----------
+# 说明：仓库中只保留本项目的二次开发成果，以下标注用于让语言占比真实反映
+#       本项目的编写量，而不是被第三方资源稀释。
+
+# 第三方前端图表库（ECharts，本地部署以支持内网离线运行）
+crm/custom/include/ai_assets/*.js       linguist-vendored
+
+# 中文语言包：SuiteCRM 社区（Crowdin）翻译资源，非本项目产出
+deploy/i18n/**                          linguist-vendored
+
+# 部署期兼容补丁：来源于 SuiteCRM 上游实现
+deploy/patches/**                       linguist-vendored
+
+# 文档与截图不计入代码语言占比
+docs/**                                 linguist-documentation
+screenshots/**                          linguist-documentation
+*.md                                    linguist-documentation
+
+# ---------- 归档类目录默认不在 diff 中展开 ----------
+/crm/cache/**                           export-ignore
+/crm/upload/**                          export-ignore

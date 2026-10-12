@@ -1,0 +1,132 @@
+# ============================================================
+# AI Enterprise CRM  (.gitignore)
+# ------------------------------------------------------------
+# 入库原则：
+#   本项目的二次开发成果 —— 扩展源码、自研模块、定制配置、脚本、文档、部署资产
+#
+# 排除原则：
+#   ① SuiteCRM 上游源码（由部署流程获取，不由本仓库分发）
+#   ② 编译产物（由 Quick Repair and Rebuild 重新生成）
+#   ③ 本地运行环境（PHP / MariaDB 便携栈、数据库数据）
+#   ④ 第三方依赖（vendor、node_modules）
+#   ⑤ 含凭据的配置文件与运行时日志
+# ============================================================
+
+# ============================================================
+# 一、SuiteCRM 应用目录 —— 精确白名单
+# ------------------------------------------------------------
+# crm/ 下默认全部排除，仅放行本项目自己编写的内容。
+# 若新增了自研模块或定制文件，请同步在本节补充放行规则。
+# ============================================================
+
+/crm/*
+!/crm/custom/
+!/crm/modules/
+!/crm/config_override.php
+!/crm/config_si.php.example
+!/crm/.htaccess
+
+# ---------- 1.1 crm/modules/ —— 只保留 3 个自研模块 ----------
+/crm/modules/*
+!/crm/modules/AID_SalesAnalytics/
+!/crm/modules/CReq_CustomerRequirements/
+!/crm/modules/Hand_ProjectHandovers/
+
+# ---------- 1.2 crm/custom/ —— 二次开发源码目录 ----------
+# ⚠️ 注意区分：
+#     crm/custom/Extension/**      是【源码】    → 必须入库
+#     crm/custom/modules/*/Ext/**  是【编译产物】→ 排除（由 repair 重新生成）
+#     crm/custom/application/**    是【编译产物】→ 排除（由 repair 重新生成）
+
+# 扩展合并产物
+/crm/custom/application/
+/crm/custom/modulebuilder/
+/crm/custom/cache/
+/crm/custom/modules/*/Ext/
+
+# 逻辑钩子合并产物（文件头自述 "will be automatically rebuilt"）
+/crm/custom/modules/logic_hooks.php
+/crm/custom/modules/*/logic_hooks.php
+
+# SuiteCRM 自带占位页
+/crm/custom/index.html
+
+# ============================================================
+# 二、本地运行环境（体积大，按 deploy/native/README.md 重建）
+# ============================================================
+/tools/
+/data/
+
+# ============================================================
+# 三、第三方依赖（由包管理器安装）
+# ============================================================
+/crm/vendor/
+node_modules/
+
+# ============================================================
+# 四、运行时产物与日志
+# ============================================================
+/crm/cache/
+/crm/upload/
+/crm/tmp/
+/crm/modulebuilder/
+/crm/*.log
+/crm/suitecrm.log
+/crm/install.log
+/crm/upgradeWizard.log
+/crm/install/status.json
+/crm/themes/*/cache/
+/crm/themes/*/themes/*/cache/
+/crm/upload/upgrades/
+/crm/include/javascript/*.php.gz
+*.log
+
+# ============================================================
+# 五、含凭据的配置（保留 .example 模板）
+# ============================================================
+/crm/config.php
+/crm/config_si.php
+/data/.pw
+# 注意：config_override.php 承载本项目的定制配置（默认语言 / 时区 / 货币），需要入库
+
+# ============================================================
+# 六、压缩包与备份
+# ============================================================
+*.zip
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.bak
+*.orig
+*.rej
+*.tmp
+
+# ============================================================
+# 七、操作系统与编辑器
+# ============================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+__pycache__/
+*.pyc
+
+# ============================================================
+# 八、开发期临时/调试产物
+# ============================================================
+/data/_*.html
+/data/dbg.html
+/data/diag*.php
+/data/*-edit.html
+/data/*-list.html
+/data/home-*.html
+/data/install-output.html
+/data/login-page.html
+/data/cookies.txt
+/data/session.txt
+/data/t.txt
