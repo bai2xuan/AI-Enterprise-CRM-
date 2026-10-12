@@ -1,0 +1,86 @@
+# ============================================================
+# AI Enterprise CRM —— Docker Compose 部署编排
+# ------------------------------------------------------------
+# 服务组成：
+#   db  : MariaDB 10.11（SuiteCRM 官方推荐版本）
+#   app : PHP 8.3 + Apache + SuiteCRM 7.15
+#
+# 启动：
+#   cd deploy/docker
+#   cp .env.example .env      # 按需修改密码等参数
+#   docker compose up -d --build
+#   浏览器访问 http://localhost:8080
+# ============================================================
+
+services:
+
+  # ---------------- 数据库 ----------------
+  db:
+    image: mariadb:10.11
+    container_name: aiecrm-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --max_allowed_packet=64M
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - aiecrm
+
+  # ---------------- 应用 ----------------
+  app:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    image: ai-enterprise-crm:7.15
+    container_name: aiecrm-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SITE_URL: ${SITE_URL}
+      SYSTEM_NAME: ${SYSTEM_NAME}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_ROOT_USER: root
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE}
+    ports:
+      - "${HTTP_PORT}:80"
+    # 工作目录中的源码挂载
+    # ------------------------------------------------------------
+    # 完整应用已在镜像构建阶段烘焙完成（上游源码 + 本项目覆盖层），
+    # 因此这里【不再】挂载 ../../crm —— 仓库中的 crm/ 只含二次开发内容，
+    # 直接挂载会用不完整的目录覆盖掉完整的应用。
+    #
+    # 如需二次开发时热重载，可临时启用下面这行：
+    #   - ../../crm/custom:/var/www/html/custom
+    networks:
+      - aiecrm
+
+volumes:
+  db_data:
+    name: aiecrm_db_data
+
+networks:
+  aiecrm:
+    name: aiecrm_net
+    driver: bridge
