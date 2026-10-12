@@ -1,0 +1,182 @@
+name: 部署验证
+
+# ============================================================
+# 目的：在 GitHub 的干净机器上真实跑一遍部署流程，
+#       证明「别人 clone 下来能装、能起、能用」不是靠自述，
+#       而是每次提交都被自动验证。
+#
+# 三件事：
+#   1. 仓库自检   —— 确认没有把编译产物/凭据/上游源码混进仓库
+#   2. 部署冒烟   —— 真的构建镜像、起容器、跑通登录与数据
+#   3. 发布镜像   —— main 分支验证通过后推到 GHCR，别人可直接 pull
+# ============================================================
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/ai-enterprise-crm
+
+jobs:
+
+  # ----------------------------------------------------------
+  # 一、仓库自检（秒级，快速失败）
+  # ----------------------------------------------------------
+  repo-check:
+    name: 仓库自检
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: crm/ 下不得出现白名单以外的文件
+        run: |
+          out=$(git ls-files crm/ | grep -vE "^crm/(custom/|modules/(AID_SalesAnalytics|CReq_CustomerRequirements|Hand_ProjectHandovers)/|config_override\.php|config_si\.php\.example|\.htaccess$)" || true)
+          if [ -n "$out" ]; then
+            echo "::error::上游源码或非本项目文件被误入库："
+            echo "$out"
+            exit 1
+          fi
+          echo "通过：crm/ 下全部为本项目产出"
+
+      - name: 编译产物不得入库
+        run: |
+          fail=0
+          n=$(git ls-files 'crm/custom/modules/*/Ext/*' | wc -l)
+          echo "custom/modules/*/Ext/ = $n"
+          [ "$n" -eq 0 ] || fail=1
+          n=$(git ls-files | grep -c 'logic_hooks\.php' || true)
+          echo "logic_hooks.php       = $n"
+          [ "$n" -eq 0 ] || fail=1
+          n=$(git ls-files | grep -c '^crm/custom/application/' || true)
+          echo "custom/application/   = $n"
+          [ "$n" -eq 0 ] || fail=1
+          [ "$fail" -eq 0 ] || { echo "::error::检测到 Quick Repair 生成的编译产物"; exit 1; }
+          echo "通过：无编译产物入库"
+
+      - name: 检查显式凭据占位符是否被填成真实值
+        run: |
+          fail=0
+          for f in deploy/docker/.env.example crm/config_si.php.example; do
+            if ! grep -q "CHANGE_ME_BEFORE_DEPLOY" "$f"; then
+              echo "::error::$f 中的占位符已被替换，可能泄漏真实凭据"
+              fail=1
+            fi
+          done
+          [ "$fail" -eq 0 ] || exit 1
+          echo "通过：凭据仍为占位符"
+
+      - name: README 与脚本中不得残留账号占位符
+        run: |
+          if grep -rn "<your-username>" README.md docs/ 2>/dev/null; then
+            echo "::error::克隆地址里还有 <your-username> 占位符"
+            exit 1
+          fi
+          echo "通过：克隆地址已填实"
+
+  # ----------------------------------------------------------
+  # 二、Docker 部署冒烟测试（真构建、真启动、真验证）
+  # ----------------------------------------------------------
+  docker-deploy:
+    name: Docker 部署冒烟测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: repo-check
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 准备 .env（CI 专用密码）
+        working-directory: deploy/docker
+        run: |
+          cat > .env <<'EOF'
+          HTTP_PORT=8080
+          SITE_URL=http://localhost:8080
+          SYSTEM_NAME=智联AI CRM
+          DB_ROOT_PASSWORD=CiRoot_2026
+          DB_NAME=suitecrm
+          DB_USER=suitecrm
+          DB_PASSWORD=CiUser_2026
+          ADMIN_USER=admin
+          ADMIN_PASSWORD=CiAdmin_2026
+          DEFAULT_LANGUAGE=zh_CN
+          EOF
+          echo "已生成 .env"
+
+      - name: 构建并启动（模拟别人在新电脑上的第一步）
+        working-directory: deploy/docker
+        run: docker compose up -d --build
+
+      - name: 等待应用就绪
+        run: |
+          for i in $(seq 1 90); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 http://localhost:8080/index.php || true)
+            echo "第 $i 次探测 -> $code"
+            if [ "$code" = "200" ]; then
+              echo "应用已就绪"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::15 分钟内应用未就绪"
+          docker compose -f deploy/docker/docker-compose.yml logs --tail=200 app
+          exit 1
+
+      - name: 验证登录页可访问
+        run: |
+          curl -sL --max-time 30 http://localhost:8080/index.php -o /tmp/login.html
+          size=$(wc -c < /tmp/login.html)
+          echo "登录页 $size 字节"
+          [ "$size" -gt 5000 ] || { echo "::error::登录页体积异常"; exit 1; }
+          grep -q 'name="user_name"' /tmp/login.html || { echo "::error::登录表单未渲染"; exit 1; }
+          echo "通过：登录页渲染正常"
+
+      - name: 验证三个自研模块已注册（导航 + ACL）
+        working-directory: deploy/docker
+        run: |
+          fail=0
+          for m in CReq_CustomerRequirements Hand_ProjectHandovers AID_SalesAnalytics; do
+            n=$(docker compose exec -T db mariadb -usuitecrm -pCiUser_2026 suitecrm -N -B \
+                 -e "SELECT COUNT(*) FROM acl_actions WHERE category='$m' AND deleted=0;" 2>/dev/null | tr -d '\r')
+            echo "$m  ACL 动作数 = $n"
+            [ "${n:-0}" -gt 0 ] || fail=1
+          done
+          [ "$fail" -eq 0 ] || { echo "::error::自研模块未注册进 ACL —— 检查 entrypoint 第 3 步是否执行"; exit 1; }
+          echo "通过：自研模块已注册"
+
+      - name: 验证演示数据已生成
+        working-directory: deploy/docker
+        run: |
+          q() {
+            docker compose exec -T db mariadb -usuitecrm -pCiUser_2026 suitecrm -N -B -e "$1" 2>/dev/null | tr -d '\r'
+          }
+          acc=$(q "SELECT COUNT(*) FROM accounts WHERE deleted=0;")
+          opp=$(q "SELECT COUNT(*) FROM opportunities WHERE deleted=0;")
+          creq=$(q "SELECT COUNT(*) FROM creq_customerrequirements WHERE deleted=0;")
+          hand=$(q "SELECT COUNT(*) FROM hand_projecthandovers WHERE deleted=0;")
+          echo "客户=$acc  商机=$opp  需求调研=$creq  项目交接=$hand"
+          [ "${acc:-0}" -ge 15 ] || { echo "::error::客户演示数据缺失"; exit 1; }
+          [ "${opp:-0}" -ge 15 ] || { echo "::error::商机演示数据缺失"; exit 1; }
+          [ "${creq:-0}" -ge 10 ] || { echo "::error::需求调研演示数据缺失"; exit 1; }
+          echo "通过：演示数据已就绪"
+
+      - name: 失败时输出容器日志
+        if: failure()
+        working-directory: deploy/docker
+        run: docker compose logs --tail=300
+
+      - name: 发布镜像到 GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          STAMP="$(date +%Y%m%d)-${GITHUB_SHA::7}"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker tag "${IMAGE_NAME}:latest" "${IMAGE_NAME}:${STAMP}"
+          docker push "${IMAGE_NAME}:latest"
+          docker push "${IMAGE_NAME}:${STAMP}"
+          echo "已发布 ${IMAGE_NAME}:latest"
+          echo "已发布 ${IMAGE_NAME}:${STAMP}"

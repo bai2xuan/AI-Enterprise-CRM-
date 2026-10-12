@@ -3,10 +3,15 @@
 > 面向 **AI 企业解决方案销售团队** 的客户管理与销售流程优化平台
 > 基于开源 CRM **SuiteCRM** 的二次开发项目
 
+[![部署验证](https://github.com/bai2xuan/AI-Enterprise-CRM-/actions/workflows/deploy-verify.yml/badge.svg)](https://github.com/bai2xuan/AI-Enterprise-CRM-/actions/workflows/deploy-verify.yml)
 [![SuiteCRM](https://img.shields.io/badge/SuiteCRM-7.15.2-blue)](https://github.com/SuiteCRM/SuiteCRM)
 [![PHP](https://img.shields.io/badge/PHP-8.3-777bb4)](https://www.php.net/)
 [![MariaDB](https://img.shields.io/badge/MariaDB-10.11-003545)](https://mariadb.org/)
 [![License](https://img.shields.io/badge/License-AGPL--3.0-green)](LICENSE)
+
+> **部署可用性由 CI 保证**：每次提交都会在 GitHub 的干净机器上真实构建镜像、
+> 启动容器并验证「登录页可访问 + 自研模块已注册 + 演示数据已生成」，
+> 通过后才发布镜像。徽章为绿色即代表当前提交可部署。
 
 ---
 
@@ -48,7 +53,7 @@
 | 本地化 | 全站中文化（语言包扩展，未改核心）；日期 `Y-m-d`、货币 ¥ |
 | 质量保障 | 定制项验收 **96/96 通过**；业务自动化验收 **7/7 通过**；HTTP 冒烟 14 页全 200 |
 | 工程规范 | 核心源码零改动；应用层定制文件 127 个全部走 `custom/` 扩展路径；Git 分阶段提交 |
-| 交付文档 | 9 份文档 + 14 张界面截图 + 323 个入库文件 |
+| 交付文档 | 9 份文档 + 14 张界面截图 + 324 个入库文件 |
 
 ---
 
@@ -105,7 +110,7 @@
 
 > 详细设计见 [`docs/功能规划说明书.md`](docs/功能规划说明书.md)
 
-**改动量统计**：323 个入库文件，全部落在 `crm/custom/`、`crm/modules/<新增模块>/`、`crm/config_override.php`、`deploy/`、`docs/`、`scripts/`、`screenshots/` 范围内；SuiteCRM 核心源码零改动。
+**改动量统计**：324 个入库文件，全部落在 `crm/custom/`、`crm/modules/<新增模块>/`、`crm/config_override.php`、`deploy/`、`docs/`、`scripts/`、`screenshots/` 范围内；SuiteCRM 核心源码零改动。
 
 > 唯一需要写入核心目录的内容是安装期兼容补丁 `modules/UpgradeWizard/uw_utils.php`
 > （用于绕开 SuiteCRM 7.15.x 自身的静默安装缺陷），它以
@@ -312,10 +317,32 @@ cd AI-Enterprise-CRM-
 
 ### 方式一：Docker 部署（推荐 / 可移植）
 
+在**任何装了 Docker 的机器**上（Windows / macOS / Linux 均可），三步即可跑起来：
+
 ```bash
-cd deploy/docker
+git clone https://github.com/bai2xuan/AI-Enterprise-CRM-.git
+cd AI-Enterprise-CRM-/deploy/docker
 cp .env.example .env          # 必须在 .env 中填入三个密码
-docker compose up -d --build  # 首次启动自动完成全部初始化
+```
+
+然后**二选一**：
+
+**① 拉取已发布镜像（最快，约 1 分钟）**
+
+CI 每次验证通过后都会把镜像发布到 GHCR，直接下载即可，无需本地构建：
+
+```bash
+docker compose pull
+docker compose up -d --no-build
+```
+
+**② 从源码构建（约 5–10 分钟）**
+
+镜像内含「下载 SuiteCRM 官方包 → 叠加本项目定制 → 应用补丁与中文包」三步合成，
+首次构建需联网下载约 190 MB 上游源码：
+
+```bash
+docker compose up -d --build
 ```
 
 访问 http://localhost:8080 —— 登录地址 `http://localhost:8080/index.php`，
@@ -336,6 +363,7 @@ docker compose up -d --build  # 首次启动自动完成全部初始化
 
 > 第 3 步**不可省略**：静默安装只建库建表，自研模块若不写入 `config` 表的 tab 清单
 > 与 `acl_actions` 表，会出现「URL 能打开、导航栏里看不到」。
+> 这一步已由容器自动完成，并由 [CI](.github/workflows/deploy-verify.yml) 每次提交验证。
 
 查看初始化日志：
 
@@ -485,7 +513,7 @@ tools/php/php.exe scripts/verify/verify-automation.php        # 业务自动化�
 | 简历项目描述 | [`docs/简历项目描述.md`](docs/简历项目描述.md) | 产品岗 / 售前岗 / 实施岗三个岗位版本的表述 |
 | **项目全景与技术亮点说明** | [`docs/项目全景与技术亮点说明.md`](docs/项目全景与技术亮点说明.md) | **10 分钟读懂全项目 + 简历素材一键提炼（推荐先读）** |
 | 仓库结构说明 | [`docs/仓库结构说明.md`](docs/仓库结构说明.md) | 仓库组织规范、目录职责、入库范围与校验方法 |
-| 仓库文件清单 | [`docs/仓库文件清单.md`](docs/仓库文件清单.md) | 全部 323 个入库文件的目录树与完整清单 |
+| 仓库文件清单 | [`docs/仓库文件清单.md`](docs/仓库文件清单.md) | 全部 324 个入库文件的目录树与完整清单 |
 | 贡献指南 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | 开发约定、提交规范、提交前检查清单 |
 | 更新日志 | [`CHANGELOG.md`](CHANGELOG.md) | 版本演进与 12 项缺陷修复记录 |
 
@@ -506,7 +534,11 @@ ai-enterprise-crm/
 ├── .gitattributes                换行符规范 + 语言统计标注
 ├── .editorconfig                 编辑器配置统一
 ├── .dockerignore                 Docker 构建上下文排除规则
-├── .github/                      Issue / PR 模板
+├── .github/                      GitHub 平台配置
+│   ├── ISSUE_TEMPLATE/              缺陷与功能建议模板
+│   ├── pull_request_template.md     PR 模板（含核心零改动自查项）
+│   └── workflows/
+│       └── deploy-verify.yml        部署验证 CI（构建 + 冒烟 + 发布镜像）
 │
 ├── crm/                          ★ 应用层：SuiteCRM 二次开发成果（127 个文件）
 │   ├── custom/                   二次开发扩展目录（81 个文件）

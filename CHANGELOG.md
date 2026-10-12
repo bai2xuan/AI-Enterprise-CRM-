@@ -5,6 +5,46 @@
 
 ---
 
+## [未发布]
+
+围绕「让别人能把项目真正部署起来」补齐的工程能力。
+
+### 新增 · 部署验证 CI
+
+- `.github/workflows/deploy-verify.yml`——每次提交在 GitHub 干净机器上真实验证可部署性：
+  - **仓库自检**：白名单外的上游源码、Quick Repair 编译产物、被替换成真实值的凭据占位符、
+    残留的 `<your-username>` 克隆地址占位符，任一命中即失败
+  - **部署冒烟**：真实构建镜像 → 启动容器 → 等待就绪 → 验证登录页渲染、
+    三个自研模块已写入 ACL、演示数据已生成
+  - **镜像发布**：main 分支验证通过后推送到 GHCR，其他人可直接 `docker compose pull`
+    使用，无需本地构建
+- README 增加部署验证徽章，绿色即代表当前提交可部署
+
+### 修复 · Docker 首次启动缺少模块初始化
+
+静默安装只建库建表，不会把自研模块写进 `config` 表的 tab 清单与 `acl_actions` 表，
+导致容器方式部署后三个自研模块「URL 能打开、导航栏里看不到」。
+
+- `deploy/docker/Dockerfile` 增加 `COPY scripts/ /opt/aiecrm/scripts/`，
+  放在 Web 根目录之外，避免 CLI 脚本被 HTTP 直接访问
+- `deploy/docker/entrypoint.sh` 新增首次安装后的初始化步骤：建立
+  `/opt/aiecrm/crm -> /var/www/html` 软链后依次执行
+  `repair → register-modules → apply-locale-preferences → seed-demo-data`，
+  单步失败不阻断容器启动
+- 初始化顺序统一为「先 repair 后 register」（register 依赖 repair 写入的 `beanList`），
+  同步修正 `deploy/native/README.md` 与 README 中原先互相矛盾的顺序
+- `docker-compose.yml` 的 `app.image` 改为 GHCR 镜像名，同时支持本地构建与直接拉取
+
+### 变更 · 文档
+
+- `deploy/native/README.md` 新增「1.1 如何获取」：PHP 8.3 NTS / MariaDB 10.11.19 /
+  SuiteCRM 7.15.2 的下载地址、放置位置、PHP 扩展要求与自检命令
+- README 第六章重写：双轨方案对比表、「换新电脑怎么选」指引、
+  方式一拆分为「拉取镜像」与「源码构建」两条通道
+- `deploy/README.md` 补充两种部署方式在第 6 步（静默安装与初始化）的执行差异
+
+---
+
 ## [1.0.0] — 2026-10-12
 
 首个完整交付版本：基于 SuiteCRM 7.15.2 完成五大功能模块的二次开发，

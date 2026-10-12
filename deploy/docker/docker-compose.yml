@@ -44,7 +44,7 @@ services:
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile
-    image: ai-enterprise-crm:7.15
+    image: ghcr.io/bai2xuan/ai-enterprise-crm:latest
     container_name: aiecrm-app
     restart: unless-stopped
     depends_on:
