@@ -1,0 +1,52 @@
+<?php
+/**
+ * 智联AI科技有限公司 · AI Enterprise CRM
+ * 基于 SuiteCRM 7.15.2 二次开发（AGPL-3.0）
+ * 本文件为新增扩展文件，不修改 SuiteCRM 核心代码。
+ */
+
+$mod_strings = array (
+  'LBL_ACCOUNT_NAME' => 'Account',
+  'LBL_ASSIGNED_USER_NAME' => 'Assigned To',
+  'LBL_BUDGET_C' => 'Budget',
+  'LBL_COMPETITOR_C' => 'Competing Solution',
+  'LBL_CONVERTED_FROM_LEAD' => 'Converted from Lead',
+  'LBL_CURRENCY' => 'Currency',
+  'LBL_CURRENT_PAIN_POINTS_C' => 'Business Pain Points',
+  'LBL_CURRENT_SYSTEM_C' => 'Current System',
+  'LBL_CUSTOMER_BACKGROUND_C' => 'Customer Background',
+  'LBL_DATE_ENTERED' => 'Date Created',
+  'LBL_DATE_MODIFIED' => 'Date Modified',
+  'LBL_DEFAULT_SUBPANEL_TITLE' => 'Customer Requirements',
+  'LBL_EXPECTED_SOLUTION_C' => 'Expected Solution',
+  'LBL_FUNCTIONAL_REQ_C' => 'Functional Requirements',
+  'LBL_GO_LIVE_DATE_C' => 'Expected Go-Live Date',
+  'LBL_HOMEPAGE_TITLE' => 'My Customer Requirements',
+  'LBL_KEY_DECISION_MAKER_C' => 'Key Decision Maker',
+  'LBL_LIST_FORM_TITLE' => 'Customer Requirements List',
+  'LBL_MODULE_NAME' => 'Customer Requirements',
+  'LBL_MODULE_NAME_SINGULAR' => 'Customer Requirement',
+  'LBL_MODULE_TITLE' => 'Customer Requirements',
+  'LBL_NEW_FORM_TITLE' => 'New Customer Requirement',
+  'LBL_OPPORTUNITY_NAME' => 'Opportunity',
+  'LBL_PANEL_ASSIGN' => 'Owner & Notes',
+  'LBL_PANEL_BACKGROUND' => 'Customer Background & Pain Points',
+  'LBL_PANEL_BASIC' => 'Basic Information',
+  'LBL_PANEL_COMMERCIAL' => 'Commercial & Decision Info',
+  'LBL_PANEL_CONTRACT' => 'Contract & Schedule',
+  'LBL_PANEL_DELIVERY' => 'Delivery Information',
+  'LBL_PANEL_QUICKCREATE' => 'Quick Create',
+  'LBL_PANEL_REQUIREMENT' => 'Requirement Details',
+  'LBL_PANEL_RISK' => 'Risk & Responsibility',
+  'LBL_PRIORITY_C' => 'Priority',
+  'LBL_REQUIREMENT_DESC_C' => 'Requirement Description',
+  'LBL_REQ_NO_C' => 'Requirement No.',
+  'LBL_REQ_STATUS_C' => 'Requirement Status',
+  'LBL_RISK_FACTOR_C' => 'Risk Factors',
+  'LBL_SEARCH_FORM_TITLE' => 'Search Customer Requirement',
+  'LBL_TECHNICAL_REQ_C' => 'Technical Requirements',
+  'LNK_IMPORT' => 'Import Customer Requirement',
+  'LNK_LIST' => 'Customer Requirements',
+  'LNK_NEW_RECORD' => 'Create Customer Requirement',
+  'LNK_VIEW_DASHBOARD' => 'View Customer Requirement Dashboard',
+);

@@ -1,0 +1,52 @@
+<?php
+/**
+ * 智联AI科技有限公司 · AI Enterprise CRM
+ * 基于 SuiteCRM 7.15.2 二次开发（AGPL-3.0）
+ * 本文件为新增扩展文件，不修改 SuiteCRM 核心代码。
+ */
+
+$mod_strings = array (
+  'LBL_ACCOUNT_NAME' => '客户名称',
+  'LBL_ASSIGNED_USER_NAME' => '负责人',
+  'LBL_BUDGET_C' => '预算金额',
+  'LBL_COMPETITOR_C' => '竞争方案',
+  'LBL_CONVERTED_FROM_LEAD' => '由线索转换',
+  'LBL_CURRENCY' => '货币',
+  'LBL_CURRENT_PAIN_POINTS_C' => '业务痛点',
+  'LBL_CURRENT_SYSTEM_C' => '现有系统',
+  'LBL_CUSTOMER_BACKGROUND_C' => '客户背景',
+  'LBL_DATE_ENTERED' => '创建时间',
+  'LBL_DATE_MODIFIED' => '修改时间',
+  'LBL_DEFAULT_SUBPANEL_TITLE' => '需求调研',
+  'LBL_EXPECTED_SOLUTION_C' => '期望解决方案',
+  'LBL_FUNCTIONAL_REQ_C' => '功能需求',
+  'LBL_GO_LIVE_DATE_C' => '期望上线时间',
+  'LBL_HOMEPAGE_TITLE' => '我的需求调研',
+  'LBL_KEY_DECISION_MAKER_C' => '关键决策人',
+  'LBL_LIST_FORM_TITLE' => '需求调研列表',
+  'LBL_MODULE_NAME' => '需求调研',
+  'LBL_MODULE_NAME_SINGULAR' => '需求调研',
+  'LBL_MODULE_TITLE' => '需求调研',
+  'LBL_NEW_FORM_TITLE' => '新建需求调研',
+  'LBL_OPPORTUNITY_NAME' => '关联商机',
+  'LBL_PANEL_ASSIGN' => '负责人与备注',
+  'LBL_PANEL_BACKGROUND' => '客户背景与痛点',
+  'LBL_PANEL_BASIC' => '基本信息',
+  'LBL_PANEL_COMMERCIAL' => '商务与决策信息',
+  'LBL_PANEL_CONTRACT' => '合同与计划',
+  'LBL_PANEL_DELIVERY' => '交付信息',
+  'LBL_PANEL_QUICKCREATE' => '快速创建',
+  'LBL_PANEL_REQUIREMENT' => '需求描述',
+  'LBL_PANEL_RISK' => '风险与责任人',
+  'LBL_PRIORITY_C' => '需求优先级',
+  'LBL_REQUIREMENT_DESC_C' => '需求描述',
+  'LBL_REQ_NO_C' => '需求编号',
+  'LBL_REQ_STATUS_C' => '需求状态',
+  'LBL_RISK_FACTOR_C' => '风险事项',
+  'LBL_SEARCH_FORM_TITLE' => '搜索需求调研',
+  'LBL_TECHNICAL_REQ_C' => '技术需求',
+  'LNK_IMPORT' => '导入需求调研',
+  'LNK_LIST' => '需求调研列表',
+  'LNK_NEW_RECORD' => '新建需求调研',
+  'LNK_VIEW_DASHBOARD' => '查看需求调研看板',
+);

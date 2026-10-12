@@ -1,0 +1,51 @@
+<?php
+/**
+ * 智联AI科技有限公司 · AI Enterprise CRM
+ * 基于 SuiteCRM 7.15.2 二次开发（AGPL-3.0）
+ * 本文件为新增扩展文件，不修改 SuiteCRM 核心代码。
+ */
+
+$mod_strings = array (
+  'LBL_ACCEPTANCE_CRITERIA_C' => 'Acceptance Criteria',
+  'LBL_ACCOUNT_NAME' => 'Account',
+  'LBL_ASSIGNED_USER_NAME' => 'Assigned To',
+  'LBL_COMMITTED_FEATURES_C' => 'Committed Features',
+  'LBL_CONTRACT_AMOUNT_C' => 'Contract Amount',
+  'LBL_CONTRACT_SCOPE_C' => 'Contract Scope',
+  'LBL_CONVERTED_FROM_LEAD' => 'Converted from Lead',
+  'LBL_CURRENCY' => 'Currency',
+  'LBL_CUSTOMER_REQUIREMENT_C' => 'Customer Requirements',
+  'LBL_DATE_ENTERED' => 'Date Created',
+  'LBL_DATE_MODIFIED' => 'Date Modified',
+  'LBL_DEFAULT_SUBPANEL_TITLE' => 'Project Handovers',
+  'LBL_DELIVERY_OWNER_NAME' => 'Delivery Owner',
+  'LBL_HANDOVER_DATE_C' => 'Handover Date',
+  'LBL_HANDOVER_NO_C' => 'Handover No.',
+  'LBL_HANDOVER_STATUS_C' => 'Handover Status',
+  'LBL_HOMEPAGE_TITLE' => 'My Project Handovers',
+  'LBL_IMPLEMENTATION_CYCLE_C' => 'Implementation Cycle',
+  'LBL_LIST_FORM_TITLE' => 'Project Handovers List',
+  'LBL_MODULE_NAME' => 'Project Handovers',
+  'LBL_MODULE_NAME_SINGULAR' => 'Project Handover',
+  'LBL_MODULE_TITLE' => 'Project Handovers',
+  'LBL_NEW_FORM_TITLE' => 'New Project Handover',
+  'LBL_OPPORTUNITY_NAME' => 'Opportunity',
+  'LBL_PANEL_ASSIGN' => 'Owner & Notes',
+  'LBL_PANEL_BACKGROUND' => 'Customer Background & Pain Points',
+  'LBL_PANEL_BASIC' => 'Basic Information',
+  'LBL_PANEL_COMMERCIAL' => 'Commercial & Decision Info',
+  'LBL_PANEL_CONTRACT' => 'Contract & Schedule',
+  'LBL_PANEL_DELIVERY' => 'Delivery Information',
+  'LBL_PANEL_QUICKCREATE' => 'Quick Create',
+  'LBL_PANEL_REQUIREMENT' => 'Requirement Details',
+  'LBL_PANEL_RISK' => 'Risk & Responsibility',
+  'LBL_PRODUCT_TYPE_C' => 'Product',
+  'LBL_PROJECT_GOAL_C' => 'Project Goal',
+  'LBL_RISK_ITEMS_C' => 'Risk Items',
+  'LBL_SEARCH_FORM_TITLE' => 'Search Project Handover',
+  'LBL_START_DATE_C' => 'Planned Start Date',
+  'LNK_IMPORT' => 'Import Project Handover',
+  'LNK_LIST' => 'Project Handovers',
+  'LNK_NEW_RECORD' => 'Create Project Handover',
+  'LNK_VIEW_DASHBOARD' => 'View Project Handover Dashboard',
+);

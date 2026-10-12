@@ -1,0 +1,51 @@
+<?php
+/**
+ * 智联AI科技有限公司 · AI Enterprise CRM
+ * 基于 SuiteCRM 7.15.2 二次开发（AGPL-3.0）
+ * 本文件为新增扩展文件，不修改 SuiteCRM 核心代码。
+ */
+
+$mod_strings = array (
+  'LBL_ACCEPTANCE_CRITERIA_C' => '验收标准',
+  'LBL_ACCOUNT_NAME' => '客户名称',
+  'LBL_ASSIGNED_USER_NAME' => '负责人',
+  'LBL_COMMITTED_FEATURES_C' => '承诺功能',
+  'LBL_CONTRACT_AMOUNT_C' => '合同金额',
+  'LBL_CONTRACT_SCOPE_C' => '合同范围',
+  'LBL_CONVERTED_FROM_LEAD' => '由线索转换',
+  'LBL_CURRENCY' => '货币',
+  'LBL_CUSTOMER_REQUIREMENT_C' => '客户需求',
+  'LBL_DATE_ENTERED' => '创建时间',
+  'LBL_DATE_MODIFIED' => '修改时间',
+  'LBL_DEFAULT_SUBPANEL_TITLE' => '项目交接',
+  'LBL_DELIVERY_OWNER_NAME' => '交付负责人',
+  'LBL_HANDOVER_DATE_C' => '交接日期',
+  'LBL_HANDOVER_NO_C' => '交接单号',
+  'LBL_HANDOVER_STATUS_C' => '交接状态',
+  'LBL_HOMEPAGE_TITLE' => '我的项目交接',
+  'LBL_IMPLEMENTATION_CYCLE_C' => '实施周期',
+  'LBL_LIST_FORM_TITLE' => '项目交接列表',
+  'LBL_MODULE_NAME' => '项目交接',
+  'LBL_MODULE_NAME_SINGULAR' => '项目交接',
+  'LBL_MODULE_TITLE' => '项目交接',
+  'LBL_NEW_FORM_TITLE' => '新建项目交接',
+  'LBL_OPPORTUNITY_NAME' => '关联商机',
+  'LBL_PANEL_ASSIGN' => '负责人与备注',
+  'LBL_PANEL_BACKGROUND' => '客户背景与痛点',
+  'LBL_PANEL_BASIC' => '基本信息',
+  'LBL_PANEL_COMMERCIAL' => '商务与决策信息',
+  'LBL_PANEL_CONTRACT' => '合同与计划',
+  'LBL_PANEL_DELIVERY' => '交付信息',
+  'LBL_PANEL_QUICKCREATE' => '快速创建',
+  'LBL_PANEL_REQUIREMENT' => '需求描述',
+  'LBL_PANEL_RISK' => '风险与责任人',
+  'LBL_PRODUCT_TYPE_C' => '购买产品',
+  'LBL_PROJECT_GOAL_C' => '项目目标',
+  'LBL_RISK_ITEMS_C' => '风险事项',
+  'LBL_SEARCH_FORM_TITLE' => '搜索项目交接',
+  'LBL_START_DATE_C' => '计划启动日期',
+  'LNK_IMPORT' => '导入项目交接',
+  'LNK_LIST' => '项目交接列表',
+  'LNK_NEW_RECORD' => '新建项目交接',
+  'LNK_VIEW_DASHBOARD' => '查看项目交接看板',
+);
