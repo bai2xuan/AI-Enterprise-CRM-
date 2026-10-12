@@ -292,8 +292,8 @@
 ### 获取代码
 
 ```bash
-git clone https://github.com/<your-username>/ai-enterprise-crm.git
-cd ai-enterprise-crm
+git clone https://github.com/whitesaber153-sys/AI-Enterprise-CRM-.git
+cd AI-Enterprise-CRM-
 ```
 
 > 仓库**不含 SuiteCRM 上游源码**（约 190 MB），部署时由流程自动获取，属正常现象。
