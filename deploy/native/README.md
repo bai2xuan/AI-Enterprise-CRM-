@@ -81,6 +81,22 @@ ai-enterprise-crm/
 
 ## 四、启动服务
 
+### 方式 A：双击一键启动脚本（推荐）
+
+仓库根目录的 `play.bat` 会把下面两步合并成一次双击，并自动打开浏览器：
+
+```
+ai-enterprise-crm\play.bat      ← 双击运行
+```
+
+它会依次检查环境、启动 MariaDB 与 Web 服务（各开一个最小化窗口），
+然后打开 <http://localhost:8080/index.php>。
+
+> 停止：关闭那两个最小化窗口（标题 `AIECRM-MariaDB` / `AIECRM-Web`）。
+> 若提示缺少文件或数据库未初始化，说明首次部署（本文档第五节）还没完成。
+
+### 方式 B：手动启动
+
 需要两个终端窗口（或用 `start /B` 后台启动）：
 
 ```bash
