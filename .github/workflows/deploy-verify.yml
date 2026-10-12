@@ -112,29 +112,28 @@ jobs:
         working-directory: deploy/docker
         run: docker compose up -d --build
 
-      - name: 等待应用就绪
+      - name: 等待应用就绪（必须出现登录表单，安装向导不算就绪）
         run: |
           for i in $(seq 1 90); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 http://localhost:8080/index.php || true)
-            echo "第 $i 次探测 -> $code"
-            if [ "$code" = "200" ]; then
-              echo "应用已就绪"
+            code=$(curl -sL -o /tmp/page.html -w '%{http_code}' --max-time 20 \
+                     http://localhost:8080/index.php || true)
+            size=$(wc -c < /tmp/page.html 2>/dev/null || echo 0)
+            if grep -q 'name="user_name"' /tmp/page.html 2>/dev/null; then
+              echo "第 $i 次探测 -> 登录表单已出现（HTTP $code，$size 字节）"
               exit 0
             fi
+            echo "第 $i 次探测 -> HTTP $code，$size 字节，尚未出现登录表单（可能仍在安装）"
             sleep 10
           done
-          echo "::error::15 分钟内应用未就绪"
-          docker compose -f deploy/docker/docker-compose.yml logs --tail=200 app
+          echo "::error::15 分钟内未出现登录表单 —— 安装大概率失败了"
           exit 1
 
-      - name: 验证登录页可访问
+      - name: 验证登录页渲染
         run: |
           curl -sL --max-time 30 http://localhost:8080/index.php -o /tmp/login.html
-          size=$(wc -c < /tmp/login.html)
-          echo "登录页 $size 字节"
-          [ "$size" -gt 5000 ] || { echo "::error::登录页体积异常"; exit 1; }
           grep -q 'name="user_name"' /tmp/login.html || { echo "::error::登录表单未渲染"; exit 1; }
-          echo "通过：登录页渲染正常"
+          grep -q 'name="username_password"' /tmp/login.html || { echo "::error::密码输入框未渲染"; exit 1; }
+          echo "通过：登录页渲染正常（$(wc -c < /tmp/login.html) 字节）"
 
       - name: 验证三个自研模块已注册（导航 + ACL）
         working-directory: deploy/docker
@@ -165,10 +164,16 @@ jobs:
           [ "${creq:-0}" -ge 10 ] || { echo "::error::需求调研演示数据缺失"; exit 1; }
           echo "通过：演示数据已就绪"
 
-      - name: 失败时输出容器日志
+      - name: 失败时输出容器日志与安装日志
         if: failure()
         working-directory: deploy/docker
-        run: docker compose logs --tail=300
+        run: |
+          echo "======== 容器日志 ========"
+          docker compose logs --tail=150
+          echo "======== /var/www/html/install.log ========"
+          docker compose exec -T app sh -c 'tail -n 120 /var/www/html/install.log' || echo "(无 install.log)"
+          echo "======== 容器内 config.php 是否存在 ========"
+          docker compose exec -T app sh -c 'ls -l /var/www/html/config.php' || echo "(config.php 不存在 —— 安装未完成)"
 
       - name: 发布镜像到 GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

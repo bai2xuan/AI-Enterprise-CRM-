@@ -28,17 +28,32 @@ DB_HOST="${DB_HOST:-db}"
 DB_PORT="${DB_PORT:-3306}"
 
 # ---------- 1. 等待数据库就绪 ----------
-echo "[1/5] 等待数据库 ${DB_HOST}:${DB_PORT} ..."
-for i in $(seq 1 60); do
+# 判据必须严格：用「应用账号 + 目标库」直接连接成功，
+# 而不是只用 root 连上服务器 —— MariaDB 官方镜像启动时会先起一个
+# 临时服务器跑初始化脚本，此时连接能成功但目标库尚未就绪，
+# 据此开始安装会立刻失败。
+echo "[1/5] 等待数据库 ${DB_HOST}:${DB_PORT} 目标库 ${DB_NAME} ..."
+DB_READY=0
+for i in $(seq 1 90); do
     if php -r '
-        $c = @mysqli_connect(getenv("DB_HOST"), getenv("DB_ROOT_USER"), getenv("DB_ROOT_PASSWORD"), "", (int)(getenv("DB_PORT") ?: 3306));
+        $c = @mysqli_connect(
+            getenv("DB_HOST"),
+            getenv("DB_USER"),
+            getenv("DB_PASSWORD"),
+            getenv("DB_NAME"),
+            (int)(getenv("DB_PORT") ?: 3306)
+        );
         exit($c ? 0 : 1);
     ' 2>/dev/null; then
-        echo "      数据库已就绪"
+        echo "      数据库已就绪（应用账号可连目标库，第 ${i} 次探测）"
+        DB_READY=1
         break
     fi
     sleep 2
 done
+if [ "$DB_READY" != "1" ]; then
+    echo "      !! 数据库在 180 秒内未就绪，继续启动但安装大概率会失败"
+fi
 
 # ---------- 2. 首次安装 ----------
 FIRST_INSTALL=0
@@ -90,14 +105,31 @@ if [ ! -f /var/www/html/config.php ]; then
 );
 EOFPHP
 
-    # 启动临时 Web 服务并触发静默安装
-    php -S 127.0.0.1:8099 -t /var/www/html >/dev/null 2>&1 &
+    # 启动临时 Web 服务，并确认它真的可用再发起安装
+    # （PHP 内置服务器是单线程的，且启动需要时间；
+    #   若直接 sleep 几秒就 curl，连接失败会被 `|| true` 吞掉，
+    #   最终只看到「安装失败」而没有任何线索）
+    php -S 127.0.0.1:8099 -t /var/www/html >/tmp/php-server.log 2>&1 &
     TMP_PID=$!
-    sleep 3
+    SERVER_READY=0
+    for i in $(seq 1 30); do
+        if curl -s -o /dev/null --max-time 5 "http://127.0.0.1:8099/install.php"; then
+            echo "      临时 Web 服务已就绪（第 ${i} 次探测）"
+            SERVER_READY=1
+            break
+        fi
+        sleep 1
+    done
+    if [ "$SERVER_READY" != "1" ]; then
+        echo "      !! 临时 Web 服务未能启动，安装无法进行"
+        tail -n 10 /tmp/php-server.log 2>/dev/null | sed 's/^/         /' || true
+    fi
 
-    curl -s --max-time 600 \
+    echo "      触发静默安装（首次建表，可能需要数分钟）..."
+    INSTALL_CODE=$(curl -s -w '%{http_code}' --max-time 900 \
         "http://127.0.0.1:8099/install.php?goto=SilentInstall&cli=true" \
-        -o /tmp/install-result.html || true
+        -o /tmp/install-result.html 2>/dev/null || echo "000")
+    echo "      install.php 返回 HTTP ${INSTALL_CODE}"
 
     kill "$TMP_PID" 2>/dev/null || true
     rm -f /var/www/html/config_si.php
@@ -105,7 +137,23 @@ EOFPHP
     if [ -f /var/www/html/config.php ]; then
         echo "      安装完成 ✓"
     else
-        echo "      !! 安装失败，请检查容器日志：/var/www/html/install.log"
+        echo "      !! 安装失败 —— 诊断信息："
+        echo "      ---- install.log 末尾 ----"
+        if [ -f /var/www/html/install.log ]; then
+            tail -n 50 /var/www/html/install.log | sed 's/^/         /'
+        else
+            echo "         (未生成 install.log)"
+        fi
+        echo "      ---- install.php 返回页文本（去标签，前 30 行）----"
+        if [ -f /tmp/install-result.html ]; then
+            sed -e 's/<[^>]*>//g' /tmp/install-result.html \
+                | tr -s '[:space:]' ' ' | fold -w 150 | grep -v '^[[:space:]]*$' \
+                | head -n 30 | sed 's/^/         /'
+        else
+            echo "         (无返回内容)"
+        fi
+        echo "      ---- php -S 日志 ----"
+        tail -n 10 /tmp/php-server.log 2>/dev/null | sed 's/^/         /' || true
     fi
 else
     echo "[2/5] 检测到 config.php，跳过安装"
@@ -122,14 +170,17 @@ if [ "$FIRST_INSTALL" = "1" ] && [ -f "${SCRIPT_ROOT}/scripts/setup/register-mod
     mkdir -p "${SCRIPT_ROOT}/data"
     printf '%s' "${ADMIN_PASSWORD}" > "${SCRIPT_ROOT}/data/.pw"
 
-    # 任一步骤失败都不阻断容器启动，仅提示查看日志
+    # 任一步骤失败都不阻断容器启动，但必须如实统计 ——
+    # 之前无论成败都打印「演示数据已就绪」，把失败掩盖成了成功。
+    STEP_FAIL=0
     run_step() {
         local desc="$1"; shift
         if "$@" >/tmp/aiecrm-step.log 2>&1; then
             echo "      [OK]   ${desc}"
         else
-            echo "      [WARN] ${desc} 失败（不影响启动）"
-            tail -n 4 /tmp/aiecrm-step.log | sed 's/^/             /'
+            STEP_FAIL=$((STEP_FAIL + 1))
+            echo "      [WARN] ${desc} 失败（不影响容器启动）"
+            tail -n 6 /tmp/aiecrm-step.log | sed 's/^/             /'
         fi
     }
 
@@ -140,7 +191,11 @@ if [ "$FIRST_INSTALL" = "1" ] && [ -f "${SCRIPT_ROOT}/scripts/setup/register-mod
     run_step "生成演示数据"               php "${SCRIPT_ROOT}/scripts/data/seed-demo-data.php" --reset
 
     rm -f "${SCRIPT_ROOT}/data/.pw"
-    echo "      初始化完成 —— 演示数据已就绪"
+    if [ "$STEP_FAIL" -eq 0 ]; then
+        echo "      初始化完成 —— 演示数据已就绪"
+    else
+        echo "      !! 有 ${STEP_FAIL} 个初始化步骤失败，应用可能不完整"
+    fi
 else
     echo "[3/5] 非首次启动，跳过初始化"
 fi
