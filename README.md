@@ -467,6 +467,7 @@ ai-enterprise-crm/
 ├── .gitignore                    精确白名单（决定什么进仓库）
 ├── .gitattributes                换行符规范 + 语言统计标注
 ├── .editorconfig                 编辑器配置统一
+├── .dockerignore                 Docker 构建上下文排除规则
 ├── .github/                      Issue / PR 模板
 │
 ├── crm/                          ★ 应用层：SuiteCRM 二次开发成果（127 个文件）
@@ -504,7 +505,8 @@ ai-enterprise-crm/
 │   ├── 测试报告.md
 │   ├── 项目全景与技术亮点说明.md
 │   ├── 简历项目描述.md
-│   └── 仓库结构说明.md
+│   ├── 仓库结构说明.md
+│   └── 仓库文件清单.md
 │
 ├── screenshots/                  ★ 展示层：界面截图（14 张）
 │
