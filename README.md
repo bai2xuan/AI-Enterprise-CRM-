@@ -48,7 +48,7 @@
 | 本地化 | 全站中文化（语言包扩展，未改核心）；日期 `Y-m-d`、货币 ¥ |
 | 质量保障 | 定制项验收 **96/96 通过**；业务自动化验收 **7/7 通过**；HTTP 冒烟 14 页全 200 |
 | 工程规范 | 核心源码零改动；应用层定制文件 127 个全部走 `custom/` 扩展路径；Git 分阶段提交 |
-| 交付文档 | 9 份文档 + 14 张界面截图 + 322 个入库文件 |
+| 交付文档 | 9 份文档 + 14 张界面截图 + 323 个入库文件 |
 
 ---
 
@@ -105,7 +105,7 @@
 
 > 详细设计见 [`docs/功能规划说明书.md`](docs/功能规划说明书.md)
 
-**改动量统计**：322 个入库文件，全部落在 `crm/custom/`、`crm/modules/<新增模块>/`、`crm/config_override.php`、`deploy/`、`docs/`、`scripts/`、`screenshots/` 范围内；SuiteCRM 核心源码零改动。
+**改动量统计**：323 个入库文件，全部落在 `crm/custom/`、`crm/modules/<新增模块>/`、`crm/config_override.php`、`deploy/`、`docs/`、`scripts/`、`screenshots/` 范围内；SuiteCRM 核心源码零改动。
 
 > 唯一需要写入核心目录的内容是安装期兼容补丁 `modules/UpgradeWizard/uw_utils.php`
 > （用于绕开 SuiteCRM 7.15.x 自身的静默安装缺陷），它以
@@ -447,7 +447,7 @@ tools/php/php.exe scripts/verify/verify-automation.php        # 业务自动化�
 | 简历项目描述 | [`docs/简历项目描述.md`](docs/简历项目描述.md) | 产品岗 / 售前岗 / 实施岗三个岗位版本的表述 |
 | **项目全景与技术亮点说明** | [`docs/项目全景与技术亮点说明.md`](docs/项目全景与技术亮点说明.md) | **10 分钟读懂全项目 + 简历素材一键提炼（推荐先读）** |
 | 仓库结构说明 | [`docs/仓库结构说明.md`](docs/仓库结构说明.md) | 仓库组织规范、目录职责、入库范围与校验方法 |
-| 仓库文件清单 | [`docs/仓库文件清单.md`](docs/仓库文件清单.md) | 全部 322 个入库文件的目录树与完整清单 |
+| 仓库文件清单 | [`docs/仓库文件清单.md`](docs/仓库文件清单.md) | 全部 323 个入库文件的目录树与完整清单 |
 | 贡献指南 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | 开发约定、提交规范、提交前检查清单 |
 | 更新日志 | [`CHANGELOG.md`](CHANGELOG.md) | 版本演进与 12 项缺陷修复记录 |
 
