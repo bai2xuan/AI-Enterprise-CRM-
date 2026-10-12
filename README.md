@@ -286,8 +286,19 @@
 
 ## 六、部署方式
 
-项目提供 **双轨部署方案**：仓库交付 Docker 配置（可移植、一键启动），本地开发/演示使用
-便携 PHP + MariaDB 栈（无需安装 Docker，Windows 双击即用）。
+项目提供 **双轨部署方案**，可按手头环境选择：
+
+| 方式 | 前置条件 | 首次启动耗时 | 适用场景 |
+|---|---|---|---|
+| **方式一 · Docker**（推荐） | 装好 Docker Desktop | 约 5–10 分钟（联网拉镜像 + 上游源码） | **换新电脑首选**、演示、交给他人复现 |
+| 方式二 · 本地便携栈 | Windows + 约 800 MB 磁盘 | 约 15 分钟（需手动备齐 PHP / MariaDB / 上游源码） | 无 Docker 环境、需要改代码调试 |
+
+> **换了一台新电脑怎么选？**
+> 只要机器能装 Docker，直接走**方式一** —— 不需要手动准备任何环境，
+> 容器首次启动会依次完成「装上游源码 → 叠加本项目定制 → 静默安装 → 注册模块 → 生成演示数据」。
+> 不能装 Docker 时走**方式二**，先按
+> [`deploy/native/README.md`](deploy/native/README.md) 的「1.1 如何获取」
+> 把 PHP / MariaDB / SuiteCRM 上游源码放到指定目录。
 
 ### 获取代码
 
@@ -303,14 +314,34 @@ cd AI-Enterprise-CRM-
 
 ```bash
 cd deploy/docker
-cp .env.example .env          # 按需修改数据库/管理员密码
-docker compose up -d --build  # 首次启动会自动完成 SuiteCRM 静默安装
+cp .env.example .env          # 必须在 .env 中填入三个密码
+docker compose up -d --build  # 首次启动自动完成全部初始化
 ```
 
-访问 http://localhost:8080
+访问 http://localhost:8080 —— 登录地址 `http://localhost:8080/index.php`，
+账号 `admin`，密码为 `.env` 中的 `ADMIN_PASSWORD`。
 
-- **登录地址**：`http://localhost:8080/index.php`
-- **默认账号**：`admin` / 见 `.env` 中的 `ADMIN_PASSWORD`
+> ⚠️ `.env.example` 里三个密码均为 `CHANGE_ME_BEFORE_DEPLOY` 占位符，
+> **不改会启动失败**。需填：`DB_ROOT_PASSWORD`、`DB_PASSWORD`、`ADMIN_PASSWORD`。
+
+首次启动依次自动执行（详见 [`deploy/docker/entrypoint.sh`](deploy/docker/entrypoint.sh)）：
+
+| 步骤 | 内容 |
+|---|---|
+| 1 | 等待数据库就绪 |
+| 2 | 生成 `config_si.php` → 触发 SuiteCRM 静默安装（建库建表） |
+| 3 | 注册自研模块（导航栏 + ACL 权限）、统一本地化偏好、重建扩展与数据库表、生成演示数据 |
+| 4 | 修正目录权限 |
+| 5 | 启动 Apache |
+
+> 第 3 步**不可省略**：静默安装只建库建表，自研模块若不写入 `config` 表的 tab 清单
+> 与 `acl_actions` 表，会出现「URL 能打开、导航栏里看不到」。
+
+查看初始化日志：
+
+```bash
+docker compose logs -f app
+```
 
 停止与清理：
 
@@ -323,24 +354,21 @@ docker compose down -v        # 停止并删除数据卷
 
 > 完整说明（含常见问题排查）见 [`deploy/native/README.md`](deploy/native/README.md)
 
-**① 准备运行环境**
+**① 准备运行环境**（新电脑必做，约 552 MB，不入库）
 
-项目内置便携运行环境，位于 `tools/`（**不入库**，约 552 MB，需自行准备）：
-
-| 组件 | 目录 | 端口 |
+| 组件 | 放入位置 | 下载来源 |
 |---|---|---|
-| PHP 8.3.35 (NTS) | `tools/php/` | 8080 |
-| MariaDB 10.11.19 | `tools/mariadb-10.11.19-winx64/` | 3307 |
+| PHP 8.3 NTS x64 | `tools/php/` | <https://windows.php.net/download/> |
+| MariaDB 10.11.19 winx64 | `tools/mariadb-10.11.19-winx64/` | <https://archive.mariadb.org/mariadb-10.11.19/winx64-packages/mariadb-10.11.19-winx64.zip> |
+| SuiteCRM 7.15.2 上游源码 | `crm/` | <https://github.com/SuiteCRM/SuiteCRM/releases/tag/v7.15.2> |
+
+> 上游源码解压到 `crm/` 时**务必选择「不覆盖已存在文件」**，否则会冲掉本项目的定制内容。
+> 详细的扩展启用说明与目录校验见 [`deploy/native/README.md`](deploy/native/README.md)「1.1 如何获取」。
 
 **② 释放部署资源**
 
-本仓库不含 SuiteCRM 上游源码，需先下载并解压：
-
 ```bash
-# 下载 SuiteCRM 7.15.2 并解压到 crm/（选择"不覆盖已存在文件"）
-#   https://github.com/SuiteCRM/SuiteCRM/releases/tag/v7.15.2
-
-# 释放中文语言包与静默安装兼容补丁
+# 释放中文语言包与静默安装兼容补丁（不可省略，否则静默安装立即中断）
 bash deploy/native/apply-overlay.sh
 ```
 

@@ -16,6 +16,37 @@
 
 > `tools/`、`data/` 均已被 `.gitignore` 排除，**不会进入仓库**，需要自行准备。
 
+### 1.1 如何获取（新电脑首次部署必做）
+
+仓库里只有二次开发成果，**运行环境和上游源码都要自己准备**。按下表放入指定路径：
+
+| 放入位置 | 下载来源 | 说明 |
+|---|---|---|
+| `tools/php/` | <https://windows.php.net/download/> | 选 **PHP 8.3.x → Non Thread Safe (NTS) → x64** 的 **Zip** 包，解压后把内容直接放进 `tools/php/`（该目录下应能看到 `php.exe`） |
+| `tools/mariadb-10.11.19-winx64/` | <https://archive.mariadb.org/mariadb-10.11.19/winx64-packages/mariadb-10.11.19-winx64.zip> | 解压后目录名已是 `mariadb-10.11.19-winx64`，整个移入 `tools/` |
+| `crm/`（上游源码） | <https://github.com/SuiteCRM/SuiteCRM/releases/tag/v7.15.2> | 下载 `SuiteCRM-7.15.2.zip`，解压到 `crm/`；**务必选择「不覆盖已存在文件」**，否则会冲掉本项目的定制内容 |
+
+完成后目录应长这样：
+
+```
+ai-enterprise-crm/
+├── crm/                        ← 上游源码 + 本项目定制（两者叠加）
+├── tools/
+│   ├── php/php.exe             ← PHP 8.3 NTS x64
+│   └── mariadb-10.11.19-winx64/bin/mysqld.exe
+└── data/                       ← 首次启动后自动生成，含数据库与凭据
+```
+
+> **PHP 扩展要求**：需启用 `mysqli`、`pdo_mysql`、`gd`、`zip`、`intl`、`mbstring`、
+> `curl`、`xml`、`bcmath`、`openssl`。在 `tools/php/php.ini` 中取消对应
+> `extension=` 行的注释即可（可从仓库根目录复制 `php.ini-development` 改名使用）。
+>
+> **建议先跑一次自检**，确认环境就绪：
+>
+> ```bash
+> tools/php/php.exe scripts/setup/healthcheck.php
+> ```
+
 ---
 
 ## 二、服务端口
@@ -69,10 +100,12 @@ tools/php/php.exe -S 127.0.0.1:8080 -t crm
 ## 五、首次部署完整流程
 
 ```bash
-# ── 步骤 0：准备 SuiteCRM 上游源码（本仓库不含） ──────────────
-# 下载 SuiteCRM 7.15.2 发布包，解压到 crm/
-#   下载地址：https://github.com/SuiteCRM/SuiteCRM/releases/tag/v7.15.2
-#   解压时请选择「不覆盖已存在文件」，以免冲掉本项目的定制内容
+# ── 步骤 0：准备运行环境与上游源码（本仓库均不含）──────────────
+#   ① tools/php/                        ← PHP 8.3 NTS x64，解压到此
+#   ② tools/mariadb-10.11.19-winx64/    ← MariaDB 10.11.19 winx64，解压到 tools/
+#   ③ crm/                              ← SuiteCRM 7.15.2 发布包解压到此
+#                                          （务必选「不覆盖已存在文件」）
+#   下载地址见本文档「1.1 如何获取」，装好后建议先跑 healthcheck 自检
 
 # ── 步骤 1：释放语言包与兼容补丁 ──────────────────────────────
 bash deploy/native/apply-overlay.sh
@@ -85,10 +118,12 @@ cp crm/config_si.php.example crm/config_si.php
 # 浏览器访问（安装完成后即可登录）
 #   http://localhost:8080/install.php?goto=SilentInstall&cli=true
 
-# ── 步骤 4：让自研模块生效 ────────────────────────────────────
+# ── 步骤 4：让自研模块生效（顺序不可颠倒）──────────────────────
+# 先 repair：重建扩展并同步字段到数据库（自定义模块表在此创建）
+# 再 register：注册 ACL 动作 + 系统导航（依赖上一步写入的 beanList）
+tools/php/php.exe scripts/setup/repair.php
 tools/php/php.exe scripts/setup/register-modules.php
 tools/php/php.exe scripts/setup/apply-locale-preferences.php
-tools/php/php.exe scripts/setup/repair.php
 
 # ── 步骤 5：生成演示数据 ──────────────────────────────────────
 tools/php/php.exe scripts/data/seed-demo-data.php --reset

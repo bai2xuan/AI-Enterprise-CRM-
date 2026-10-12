@@ -79,6 +79,15 @@ COPY deploy/i18n/zh_CN/ /var/www/html/
 COPY deploy/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# ---------- 部署期脚本 ----------
+# 静默安装只建库建表，不会把自研模块写进「顶部导航」与「ACL 权限表」，
+# 因此首次启动后还需执行 scripts/ 下的初始化脚本（见 entrypoint.sh 第 3 步）。
+#
+# 放在 /opt/aiecrm/ 而**不是** Web 根目录下，避免这些 CLI 脚本被 HTTP 直接访问。
+# 脚本内部以 dirname(__DIR__, 2) 定位 "<root>/crm"，故入口脚本会建立
+# /opt/aiecrm/crm -> /var/www/html 的软链，脚本无需改动即可在容器内运行。
+COPY scripts/ /opt/aiecrm/scripts/
+
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

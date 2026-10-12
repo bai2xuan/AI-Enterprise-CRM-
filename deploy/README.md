@@ -59,3 +59,10 @@ deploy/
 ```bash
 bash deploy/native/apply-overlay.sh
 ```
+
+第 6 步的执行方式两种部署不同：
+
+| 方式 | 静默安装与初始化 |
+|---|---|
+| Docker | `docker/entrypoint.sh` 在容器**首次启动时全自动完成**（安装 → repair → 注册模块 → 生成演示数据） |
+| 本地便携栈 | 按 [`native/README.md`](native/README.md) 第五节逐步手工执行 |
