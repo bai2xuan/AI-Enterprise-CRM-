@@ -6,7 +6,7 @@
 [![SuiteCRM](https://img.shields.io/badge/SuiteCRM-7.15.2-blue)](https://github.com/SuiteCRM/SuiteCRM)
 [![PHP](https://img.shields.io/badge/PHP-8.3-777bb4)](https://www.php.net/)
 [![MariaDB](https://img.shields.io/badge/MariaDB-10.11-003545)](https://mariadb.org/)
-[![License](https://img.shields.io/badge/License-AGPL--3.0-green)](LICENSE.txt)
+[![License](https://img.shields.io/badge/License-AGPL--3.0-green)](LICENSE)
 
 ---
 
@@ -288,6 +288,16 @@
 
 项目提供 **双轨部署方案**：仓库交付 Docker 配置（可移植、一键启动），本地开发/演示使用
 便携 PHP + MariaDB 栈（无需安装 Docker，Windows 双击即用）。
+
+### 获取代码
+
+```bash
+git clone https://github.com/<your-username>/ai-enterprise-crm.git
+cd ai-enterprise-crm
+```
+
+> 仓库**不含 SuiteCRM 上游源码**（约 190 MB），部署时由流程自动获取，属正常现象。
+> 原因见 [第九章 · 为什么仓库里没有 SuiteCRM 源码](#为什么仓库里没有-suitecrm-源码)。
 
 ### 方式一：Docker 部署（推荐 / 可移植）
 
