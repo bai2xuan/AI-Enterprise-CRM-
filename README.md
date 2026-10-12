@@ -292,7 +292,7 @@
 ### 获取代码
 
 ```bash
-git clone https://github.com/whitesaber153-sys/AI-Enterprise-CRM-.git
+git clone https://github.com/bai2xuan/AI-Enterprise-CRM-.git
 cd AI-Enterprise-CRM-
 ```
 
